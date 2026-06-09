@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI-IDS · Intrusion Detection System</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══════════════════════════════ -->
+  <nav class="navbar">
+    <div class="nav-inner">
+
+      <a href="#" class="nav-brand">
+        <div class="nav-logo">🛡️</div>
+        <div class="nav-name">AI<span>·</span>IDS</div>
+      </a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Detection</a></li>
+        <li><a href="#">Logs</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <div class="nav-status">
+          <span class="status-dot"></span>System Online
+        </div>
+        <div class="nav-toggle" id="navToggle">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">
+        <span class="badge-dot"></span>ML Engine Active · v2.0
+      </div>
+      <h1>AI-Enhanced Intrusion<br>Detection System</h1>
+      <p>Real-time network traffic classification powered by machine learning</p>
+    </header>
+
+    <!-- Split Layout -->
+    <div class="split">
+
+      <!-- LEFT — Input Form -->
+      <div class="card">
+        <div class="card-title">Network Flow Parameters</div>
+
+        <form method="POST" action="/predict">
+
+          <div class="form-group">
+            <label for="flow_duration">Flow Duration</label>
+            <input type="number" step="any" id="flow_duration" name="flow_duration"
+                   placeholder="e.g. 750000"
+                   value="{{ request.form.get('flow_duration', '') }}" required/>
+          </div>
+
+          <div class="form-group">
+            <label for="total_fwd_packets">Total Fwd Packets</label>
+            <input type="number" step="any" id="total_fwd_packets" name="total_fwd_packets"
+                   placeholder="e.g. 3"
+                   value="{{ request.form.get('total_fwd_packets', '') }}" required/>
+          </div>
+
+          <div class="form-group">
+            <label for="total_backward_packets">Total Backward Packets</label>
+            <input type="number" step="any" id="total_backward_packets" name="total_backward_packets"
+                   placeholder="e.g. 2"
+                   value="{{ request.form.get('total_backward_packets', '') }}" required/>
+          </div>
+
+          <div class="form-group">
+            <label for="total_length_fwd_packets">Total Length of Fwd Packets</label>
+            <input type="number" step="any" id="total_length_fwd_packets" name="total_length_fwd_packets"
+                   placeholder="e.g. 1"
+                   value="{{ request.form.get('total_length_fwd_packets', '') }}" required/>
+          </div>
+
+          <button type="submit" class="btn">⚡ Analyze Traffic</button>
+        </form>
+      </div>
+
+      <!-- RIGHT — Result Panel -->
+      <div class="result-panel">
+
+        {% if prediction %}
+
+        <!-- Result Card -->
+        <div class="result-card {% if prediction|lower == 'benign' %}benign{% else %}threat{% endif %}">
+          <div class="result-card-inner">
+
+            <div class="result-band">
+              <div class="verdict-icon">
+                {% if prediction|lower == 'benign' %}✓{% else %}⚠{% endif %}
+              </div>
+              <div class="verdict-info">
+                <div class="sub">Classification Result</div>
+                <div class="main">{{ prediction }}</div>
+              </div>
+            </div>
+
+            <div class="result-body">
+              <div class="data-grid">
+                <div class="di">
+                  <div class="di-lbl">Flow Duration</div>
+                  <div class="di-val">{{ request.form.get('flow_duration') }}</div>
+                </div>
+                <div class="di">
+                  <div class="di-lbl">Fwd Packets</div>
+                  <div class="di-val">{{ request.form.get('total_fwd_packets') }}</div>
+                </div>
+                <div class="di">
+                  <div class="di-lbl">Bwd Packets</div>
+                  <div class="di-val">{{ request.form.get('total_backward_packets') }}</div>
+                </div>
+                <div class="di">
+                  <div class="di-lbl">Fwd Length</div>
+                  <div class="di-val">{{ request.form.get('total_length_fwd_packets') }}</div>
+                </div>
+              </div>
+
+              <div class="threat-meter">
+                <div class="tm-header">
+                  <span class="tm-label">Threat Level</span>
+                  <span class="tm-value">
+                    {% if prediction|lower == 'benign' %}Low Risk{% else %}High Risk{% endif %}
+                  </span>
+                </div>
+                <div class="tm-track">
+                  <div class="tm-fill"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <div class="sb-item">
+            <div class="sb-lbl">Engine</div>
+            <div class="sb-val">ML Active</div>
+          </div>
+          <div class="sb-div"></div>
+          <div class="sb-item">
+            <div class="sb-lbl">Features</div>
+            <div class="sb-val">4 / 4</div>
+          </div>
+          <div class="sb-div"></div>
+          <div class="sb-item">
+            <div class="sb-lbl">Status</div>
+            <div class="sb-val {% if prediction|lower == 'benign' %}status-safe{% else %}status-threat{% endif %}">
+              {% if prediction|lower == 'benign' %}Safe{% else %}Threat{% endif %}
+            </div>
+          </div>
+        </div>
+
+        {% else %}
+
+        <!-- Empty State -->
+        <div class="empty-state">
+          <div class="empty-shield">🛡️</div>
+          <h3>Awaiting Analysis</h3>
+          <p>Enter network flow parameters on the left and click <strong>Analyze Traffic</strong> to run the ML classification engine.</p>
+        </div>
+
+        {% endif %}
+
+      </div>
+      <!-- /result-panel -->
+
+    </div>
+    <!-- /split -->
+
+  </main>
+
+  <!-- ══ FOOTER ══════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+
+      <div class="footer-brand">
+        <div class="footer-logo">🛡️</div>
+        <div class="footer-name">AI-Enhanced IDS</div>
+      </div>
+
+      <div class="footer-copy">
+        © <span id="footerYear"></span> AI-IDS · All rights reserved
+      </div>
+
+      <ul class="footer-links">
+        <li><a href="#">GitHub</a></li>
+        <li><a href="#">Docs</a></li>
+        <li><a href="#">Privacy</a></li>
+      </ul>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-tag">Machine Learning Engine</span>
+      <span class="footer-tag">Real-time Detection</span>
+      <span class="footer-tag">Network Security</span>
+      <span class="footer-tag">Built with Python · Flask</span>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>
